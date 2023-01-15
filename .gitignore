@@ -3,3 +3,6 @@
 *.hex
 /releases
 *.tar.gz
+src/cli.rs
+file
+file.txt
