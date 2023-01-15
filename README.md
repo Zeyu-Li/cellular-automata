@@ -4,6 +4,19 @@
 
 `cellular` is a command-line tool that allows for generation of gif images using elementary cellular automata. ([Read more about elementary cellular automata here.](https://en.wikipedia.org/wiki/Elementary_cellular_automaton)) It supports starting automata with random seeds as well as providing initial inputs directly through the command line or from a file.
 
+![Rule 18](cellular.gif)
+
+## Use
+
+To generate a static image of a cellular automaton with the single middle cell set to 1 and all other cells set to 0, run the following (of width 200 and rule 18):
+
+⚠️ Requires cellular to be installed
+
+```bash
+sh ./generate.sh 200 18
+```
+
+
 ## Installation
 
 ### Via cargo
