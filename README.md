@@ -63,27 +63,22 @@ All options and their shortcut syntax are shown when the help flag is passed
 
 ```
 → cellular --help
-cellular
 A simple command-line based cellular automaton animation creator
 
-USAGE:
-    cellular [FLAGS] [OPTIONS] --frames <frames> --height <height> --width <width>
+Usage: cellular [OPTIONS] --height <height> --frames <frames>
 
-FLAGS:
-        --help       Prints help information
-    -n, --no-prog    disable progress bar
-    -V, --version    Prints version information
-
-OPTIONS:
-    -b, --bitmap <bitmap>      Input bitmap as string of 1s and 0s
-    -d, --density <density>    Probability that each cell in initialized bit vector will be occupied. Should be between
-                               0.0 and 1.0 [default: 0.5]
-    -f, --frames <frames>      Number of frames in final animation
-    -h, --height <height>      Specifies height of output image
-    -i, --infile <infile>      path to file containing initial bitmap as string of 1s and 0s
-    -o, --output <output>      Specifies output file. Defaults to output_w<width>_h<height>_f<frames>_r<rule>.gif
-    -r, --rule <rule>          8 bit unsigned integer which specifies the cellular automaton to simulate [default: 110]
-    -w, --width <width>        Specifies width of output image
+Options:
+      --help               Prints help information
+  -w, --width <width>      Specifies width of output image
+  -h, --height <height>    Specifies height of output image
+  -f, --frames <frames>    Number of frames in final animation
+  -d, --density <density>  Probability that each cell in initialized bit vector will be occupied. Should be between 0.0 and 1.0 [default: 0.5]
+  -b, --bitmap <bitmap>    Input bitmap as string of 1s and 0s
+  -i, --infile <infile>    path to file containing initial bitmap as string of 1s and 0s
+  -o, --output <output>    Specifies output file. Defaults to output_w<width>_h<height>_f<frames>_r<rule>.gif
+  -r, --rule <rule>        8 bit unsigned integer which specifies the cellular automaton to simulate [default: 110]
+  -n, --no-prog            disable progress bar
+  -V, --version            Print version
 ```
 
 #### Starting with input provided as a command-line argument
