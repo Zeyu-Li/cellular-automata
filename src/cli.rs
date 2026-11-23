@@ -1,5 +1,5 @@
 use crate::image_manip::bitmap::BitMap;
-use clap::{App, Arg};
+use clap::{Arg, ArgAction, ArgMatches, Command};
 use std::convert::*;
 use std::fs::File;
 use std::io::Read;
@@ -136,82 +136,90 @@ fn validate_bitmap_input(input_bitmap: &str) -> BitMap {
     bitmap
 }
 
+fn arg_value<'a>(matches: &'a ArgMatches, id: &str) -> Option<&'a str> {
+    matches.get_one::<String>(id).map(String::as_str)
+}
+
 pub fn parse_args() -> Result<CLIArgs, std::num::ParseIntError> {
-    let matches = App::new("cellular")
+    let matches = Command::new("cellular")
+        .version(env!("CARGO_PKG_VERSION"))
         .author("W-A-James <https://github.com/W-A-James>")
         .about("A simple command-line based cellular automaton animation creator")
+        // `-h` is the height option, so help is only available as `--help`
+        .disable_help_flag(true)
         .arg(
-            Arg::with_name("width")
-                .short("w")
-                .long("width")
-                .help("Specifies width of output image")
-                .takes_value(true)
-                .required_unless_one(&["infile", "bitmap"])
+            Arg::new("help")
+                .long("help")
+                .help("Prints help information")
+                .action(ArgAction::Help),
         )
         .arg(
-            Arg::with_name("height")
-                .short("h")
+            Arg::new("width")
+                .short('w')
+                .long("width")
+                .help("Specifies width of output image")
+                .required_unless_present_any(["infile", "bitmap"]),
+        )
+        .arg(
+            Arg::new("height")
+                .short('h')
                 .long("height")
                 .help("Specifies height of output image")
-                .takes_value(true)
                 .required(true),
         )
         .arg(
-            Arg::with_name("frames")
-                .short("f")
+            Arg::new("frames")
+                .short('f')
                 .long("frames")
                 .help("Number of frames in final animation")
-                .required(true)
-                .takes_value(true),
+                .required(true),
         )
         .arg(
-            Arg::with_name("density")
+            Arg::new("density")
                 .long("density")
-                .short("d")
+                .short('d')
                 .help("Probability that each cell in initialized bit vector will be occupied. Should be between 0.0 and 1.0")
                 .default_value("0.5"),
         )
         .arg(
-            Arg::with_name("bitmap")
-            .short("b")
-            .long("bitmap")
-            .help("Input bitmap as string of 1s and 0s")
-            .takes_value(true)
-            .conflicts_with("density")
-            .conflicts_with("width")
-            )
-        .arg(
-            Arg::with_name("infile")
-            .short("i")
-            .long("infile")
-            .help("path to file containing initial bitmap as string of 1s and 0s")
-            .takes_value(true)
-            .conflicts_with("bitmap")
-            .conflicts_with("width")
-            )
-        .arg(
-            Arg::with_name("output")
-                .short("o")
-                .long("output")
-                .help("Specifies output file. Defaults to output_w<width>_h<height>_f<frames>_r<rule>.gif")
-                .takes_value(true),
+            Arg::new("bitmap")
+                .short('b')
+                .long("bitmap")
+                .help("Input bitmap as string of 1s and 0s")
+                .conflicts_with("density")
+                .conflicts_with("width"),
         )
         .arg(
-            Arg::with_name("rule")
-                .short("r")
+            Arg::new("infile")
+                .short('i')
+                .long("infile")
+                .help("path to file containing initial bitmap as string of 1s and 0s")
+                .conflicts_with("bitmap")
+                .conflicts_with("width"),
+        )
+        .arg(
+            Arg::new("output")
+                .short('o')
+                .long("output")
+                .help("Specifies output file. Defaults to output_w<width>_h<height>_f<frames>_r<rule>.gif"),
+        )
+        .arg(
+            Arg::new("rule")
+                .short('r')
                 .long("rule")
                 .help("8 bit unsigned integer which specifies the cellular automaton to simulate")
                 .default_value("110"),
         )
         .arg(
-            Arg::with_name("no-prog")
-                .short("n")
+            Arg::new("no-prog")
+                .short('n')
                 .long("no-prog")
                 .help("disable progress bar")
-            )
+                .action(ArgAction::SetTrue),
+        )
         .get_matches();
 
-    let height: u16 = match matches.value_of("height").unwrap().parse() {
+    let height: u16 = match arg_value(&matches, "height").unwrap().parse() {
         Ok(h) => validate_integer_inputs(Param::Height, h)
             .try_into()
             .unwrap(),
@@ -221,7 +229,7 @@ pub fn parse_args() -> Result<CLIArgs, std::num::ParseIntError> {
         }
     };
 
-    let steps = match matches.value_of("frames").unwrap().parse() {
+    let steps = match arg_value(&matches, "frames").unwrap().parse() {
         Ok(s) => validate_integer_inputs(Param::Frames, s)
             .try_into()
             .unwrap(),
@@ -231,7 +239,7 @@ pub fn parse_args() -> Result<CLIArgs, std::num::ParseIntError> {
         }
     };
 
-    let rule = match matches.value_of("rule").unwrap().parse() {
+    let rule = match arg_value(&matches, "rule").unwrap().parse() {
         Ok(r) => validate_integer_inputs(Param::Rule, r).try_into().unwrap(),
         Err(_) => {
             println!("Could not interpret rule parameter");
@@ -239,7 +247,7 @@ pub fn parse_args() -> Result<CLIArgs, std::num::ParseIntError> {
         }
     };
 
-    let probability_density = match matches.value_of("density").unwrap().parse() {
+    let probability_density = match arg_value(&matches, "density").unwrap().parse() {
         Ok(d) => validate_float_input(Param::Density, d),
         Err(_) => {
             println!("Could not interpret density parameter");
@@ -247,11 +255,11 @@ pub fn parse_args() -> Result<CLIArgs, std::num::ParseIntError> {
         }
     };
 
-    let random = !matches.is_present("bitmap") && !matches.is_present("infile");
+    let random = !matches.contains_id("bitmap") && !matches.contains_id("infile");
     let width: u16;
     let bitmap: Option<BitMap>;
     if random {
-        width = match matches.value_of("width").unwrap().parse() {
+        width = match arg_value(&matches, "width").unwrap().parse() {
             Ok(w) => validate_integer_inputs(Param::Width, w).try_into().unwrap(),
             Err(_) => {
                 println!("Could not interpret width parameter");
@@ -260,12 +268,12 @@ pub fn parse_args() -> Result<CLIArgs, std::num::ParseIntError> {
         };
         bitmap = None;
     } else {
-        if matches.is_present("bitmap") {
-            let bmp = validate_bitmap_input(matches.value_of("bitmap").unwrap());
+        if matches.contains_id("bitmap") {
+            let bmp = validate_bitmap_input(arg_value(&matches, "bitmap").unwrap());
             width = bmp.size().try_into().unwrap();
             bitmap = Some(bmp);
         } else {
-            match File::open(matches.value_of("infile").unwrap()) {
+            match File::open(arg_value(&matches, "infile").unwrap()) {
                 Ok(mut f) => {
                     let mut bitmap_string = String::new();
                     f.read_to_string(&mut bitmap_string).unwrap();
@@ -281,10 +289,10 @@ pub fn parse_args() -> Result<CLIArgs, std::num::ParseIntError> {
         }
     }
 
-    let disable_prog = matches.is_present("no-prog");
+    let disable_prog = matches.get_flag("no-prog");
 
-    let output = if matches.is_present("output") {
-        String::from(matches.value_of("output").unwrap())
+    let output = if matches.contains_id("output") {
+        String::from(arg_value(&matches, "output").unwrap())
     } else {
         format!("output_w{}_h{}_f{}_r{}.gif", width, height, steps, rule)
     };

@@ -11,15 +11,12 @@ repository = "https://github.com/W-A-James/cellular"
 
 [dependencies]
 gif = "0.11.2"
-gif-dispose = "3.1.0"
-clap = "2.33.3"
-rand = "0.7.3"
-indicatif = "0.16.1"
+clap = "4.6.0"
+rand = "0.8.6"
+indicatif = "0.18.0"
 bit-vec = "0.6.3"
 
 [dev-dependencies]
-plotters = "^0.3.1"
 log = "0.4.11"
-simple_logger = "1.11.0"
+simple_logger = "5.2.0"
 csv = "1.1.6"
-serde = "1.0.126"

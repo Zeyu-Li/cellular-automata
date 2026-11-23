@@ -17,6 +17,7 @@ impl ProgBar {
         bar.set_style(
             ProgressStyle::default_bar()
                 .template("{prefix} [{wide_bar:.green/red}] {percent}%")
+                .expect("valid progress bar template")
                 .progress_chars("==-"),
         );
         bar.set_prefix(format!("Building: '{}'", outfile));
@@ -28,11 +29,12 @@ impl ProgBar {
     }
 
     pub fn update(&mut self, val: u64) {
-        if val == self.bar.length() {
-            self.bar.set_position(self.bar.length());
+        if Some(val) == self.bar.length() {
+            self.bar.set_position(val);
             self.bar.set_style(
                 ProgressStyle::default_bar()
                     .template("{prefix:.green} [{wide_bar:.green/red}] {percent}%")
+                    .expect("valid progress bar template")
                     .progress_chars("==-"),
             );
             self.bar.set_prefix(format!("Done: '{}'", self.outfile));
